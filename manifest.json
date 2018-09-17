@@ -10,7 +10,16 @@
         "declarativeContent",
         "storage", 
         "activeTab", 
-        "tabs"
+        "tabs",
+        "https://*/"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["https://www.facebook.com/profile.php*"],
+            "js": ["jquery-3.3.1.min.js",
+                    "getFriendsTimeline.js",
+                    "getFriendsList.js"]
+        }
     ],
     "page_action": {
         "default_icon": {
