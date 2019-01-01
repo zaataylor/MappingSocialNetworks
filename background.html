@@ -1,8 +1,41 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    </head>
-    <body>
-        <script src="background.js"></script>
-    </body>
+
+<head>
+    <script src="d3.js"></script>
+</head>
+<style>
+    .link line {
+        stroke:white;
+        stroke-opacity: 1.0;
+    }
+
+    .node circle {
+        stroke: rgb(245, 6, 245);
+        fill:red;
+    }
+
+    body {
+        background-color: white;
+    }
+
+    button {
+        color: green;
+    }
+
+</style>
+
+<body>
+    <div style="text-align: center">
+        <div style="display: inline-block; justify-content: center">
+            <h1 style="font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">Mapping My Social Network</h1>
+            <svg width="1400" height="700"></svg>
+        </div>
+    </div>
+    <div style="text-align:center">
+        <button id="startButton">Click to Start</button>
+    </div>
+    <script src="viz.js"></script>
+</body>
+
 </html>

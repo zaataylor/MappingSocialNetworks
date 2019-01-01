@@ -2,18 +2,24 @@
 
 //make sure document is ready before we work with it 
 $(document).ready(function () {
-    var currentPageURL = window.location.href;
-    if (currentPageURL.includes("pb_friends_tl")) {
-        pageScroll().then(friendGetter)
-    }
+    chrome.runtime.onMessage.addListener(function (request, sender) {
+        if (request.from == "background_1") {
+            pageScroll(10, request).then(friendGetter)
+        }
+    })
 })
 
 //scrolls down page and gets the list of friends on the timeline
-var scrollDirection = 18;
-function pageScroll() {
+function pageScroll(scrollDirection, request) {
     return new Promise(function (resolve, reject) {
+        //scroll down by scrollDirection number of pixels
         window.scrollBy(0, scrollDirection);
-        scrolldelay = setTimeout(function () { pageScroll().then(friendGetter) }, 50);
+        //start a recursive set timeout call with delay of 25 milliseconds
+        if (request.from == "background_1") {
+            scrolldelay = setTimeout(function () { pageScroll(scrollDirection, request).then(friendGetter) }, 25);
+        }
+
+        //indicates bottom of page has been reached, so there is no need to continue recursive setTimeout calls
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
             clearTimeout(scrolldelay);
             resolve();
@@ -26,11 +32,11 @@ var friendsArray = []
 function friendGetter() {
     var friendsList = $("ul li[class=_698]")
     $(friendsList).each(function () {
-        var friend = new Friend($(this))
-        chrome.runtime.sendMessage({ from: "getFriendsList", message: friend }, function (response) {
-            console.log(response)
-        })
+        friendsArray.push(new Friend($(this)))
     })
+    if (friendsArray.length == friendsList.length) {
+        chrome.runtime.sendMessage({ from: "getFriendsList", message: friendsArray })
+    }
 }
 
 //makes friend objects that have a person's name and the URL to their FB page
@@ -42,8 +48,17 @@ function Friend(friendObj) {
     var idString = $(friendObj).find("div[class=uiProfileBlockContent] a:nth-child(1)").attr("data-hovercard")
     //regex that matches the string "id=" followed by one or more decimal digits and ending with an equals sign
     var regex = /id=(\d+)=*/
-    var uuidString = idString.match(regex)
-    this.fbID = uuidString[1]
+    var uuidString;
+    if(idString != undefined){
+        uuidString = idString.match(regex)
+        this.fbID = uuidString[1]
+    } else {
+        //case where friend has deactivated their account
+        var inactiveIDString = $(friendObj).find("div[class=uiProfileBlockContent] a:nth-child(1)").attr("ajaxify")
+        uuidString = inactiveIDString.match(regex)
+        this.fbID = uuidString[1]
+    }
+    
     this.mutualFriendsUrl = "https://www.facebook.com/browse/mutual_friends/?uid=" + this.fbID
     return this
 }
