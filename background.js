@@ -89,7 +89,6 @@ chrome.tabs.onCreated.addListener(function (tab) {
 
 //Generates a simulated list of friends for each friend in friends list
 function mutualFriendsSimulator(friends) {
-    //instead of opening a bunch of tabs, lets try an AJAX request using jQuery
     return new Promise(function (resolve, reject) {
         //for each friend in my friends list
         for (j = 0; j < friends.length; j++) {

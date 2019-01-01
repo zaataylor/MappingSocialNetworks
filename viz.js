@@ -67,18 +67,7 @@ button.onclick = function () {
 
         //dragging behavior(s)
         var drag = d3.drag()
-            .on("drag", function (d, i) {
-                d.x += d3.event.x;
-                d.y += d3.event.y;
-                d3.select(this).attr("cx", d.x).attr("cy", d.y);
-                links.each(function (l, li) {
-                    if (l.source == i) {
-                        d3.select(this).attr("x1", d.x).attr("y1", d.y);
-                    } else if (l.target == i) {
-                        d3.select(this).attr("x2", d.x).attr("y2", d.y);
-                    }
-                })
-            })
+            .on("start", started)
 
         //links on the graph
         var links = svg.selectAll(".link")
@@ -119,7 +108,28 @@ button.onclick = function () {
             //.attr("r", function (d) { return Math.ceil(Math.sqrt(d.value)) })
             .attr("r", 7.5)
             .attr("fill", "red")
-            .append("title").text(function (d) { return d.name })
             .call(drag)
+            .append("title").text(function (d) { return d.name })
+
+        function started(){
+            var circle = d3.select(this).classed("active", true);
+            d3.event.on("drag", dragged).on("end", ended)
+
+            function dragged(d, i){
+                console.log("Dragging now")
+                circle.attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+                links.each(function(l, li){
+                    if(l.source == i){
+                        d3.select(this).attr("x1", d.x).attr("y1", d.y)
+                    } else if(l.target == i){
+                        d3.select(this).attr("x2", d.x).attr("y2", d.y)
+                    }
+                })
+            }
+
+            function ended(){
+                circle.classed("active", false);
+            }
+        }
     })
 }
